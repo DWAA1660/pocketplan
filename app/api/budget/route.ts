@@ -38,3 +38,14 @@ export async function DELETE(request: Request) {
   if (kind === 'category' && await env.DB.prepare('SELECT 1 FROM expenses WHERE category_id = ? LIMIT 1').bind(entryId).first()) return json({ error: 'This envelope has expenses. Remove them first.' }, 409);
   await env.DB.prepare(`DELETE FROM ${table} WHERE id = ?`).bind(entryId).run(); return json({ ok: true });
 }
+export async function PUT(request: Request) {
+  if (!(await authorized(request))) return json({ error: 'Incorrect household PIN' }, 401);
+  const body = await request.json() as Record<string, unknown>;
+  if (body.kind !== 'category' || !clean(body.id, 64)) return json({ error: 'Invalid request' }, 400);
+  const name = clean(body.name); const limit = cents(body.monthlyLimit); const color = clean(body.color, 12);
+  if (!name) return json({ error: 'Enter an envelope name' }, 400);
+  if (limit < 0) return json({ error: 'Enter a non-negative monthly amount' }, 400);
+  const result = await env.DB.prepare('UPDATE categories SET name = ?, monthly_limit_cents = ?, color = ? WHERE id = ?').bind(name, limit, color, clean(body.id, 64)).run();
+  if (!result.meta.changes) return json({ error: 'Envelope not found' }, 404);
+  return json({ ok: true });
+}
