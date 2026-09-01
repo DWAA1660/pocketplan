@@ -7,13 +7,25 @@ async function authorized(request: Request) { const row = await env.DB.prepare('
 export async function GET(request: Request) {
   if (!(await authorized(request))) return json({ error: 'Incorrect household PIN' }, 401);
   const month = new URL(request.url).searchParams.get('month') || new Date().toISOString().slice(0, 7);
-  const [people, categories, incomes, expenses] = await env.DB.batch([
+  const [people, categories, incomes, expenses, history, startDate] = await env.DB.batch([
     env.DB.prepare('SELECT id, name FROM people ORDER BY position'),
     env.DB.prepare('SELECT id, name, monthly_limit_cents AS monthlyLimitCents, color FROM categories ORDER BY position'),
     env.DB.prepare("SELECT id, person_id AS personId, amount_cents AS amountCents, source, date FROM incomes WHERE substr(date,1,7) = ? ORDER BY date DESC").bind(month),
     env.DB.prepare("SELECT id, person_id AS personId, category_id AS categoryId, amount_cents AS amountCents, note, date FROM expenses WHERE substr(date,1,7) = ? ORDER BY date DESC").bind(month),
+    env.DB.prepare("SELECT category_id AS categoryId, substr(date,1,7) AS month, SUM(amount_cents) AS spentCents FROM expenses WHERE substr(date,1,7) < ? GROUP BY category_id, substr(date,1,7)").bind(month),
+    env.DB.prepare("SELECT MIN(date) AS firstDate FROM (SELECT date FROM incomes UNION ALL SELECT date FROM expenses)"),
   ]);
-  return json({ people: people.results, categories: categories.results.map((r: any) => ({ ...r, monthlyLimit: r.monthlyLimitCents / 100 })), incomes: incomes.results.map((r: any) => ({ ...r, amount: r.amountCents / 100 })), expenses: expenses.results.map((r: any) => ({ ...r, amount: r.amountCents / 100 })) });
+  const firstMonth = String((startDate.results[0] as any)?.firstDate || month).slice(0, 7);
+  const [targetYear, targetMonth] = month.split('-').map(Number);
+  const [startYear, startMonth] = firstMonth.split('-').map(Number);
+  const historyByCategory = new Map<string, Map<string, number>>();
+  for (const row of history.results as any[]) { if (!historyByCategory.has(row.categoryId)) historyByCategory.set(row.categoryId, new Map()); historyByCategory.get(row.categoryId)!.set(row.month, Number(row.spentCents)); }
+  const categoriesWithCarryover = (categories.results as any[]).map(r => {
+    let balance = 0; const spentByMonth = historyByCategory.get(r.id) || new Map<string, number>();
+    for (let y = startYear, m = startMonth; y < targetYear || (y === targetYear && m < targetMonth); m += 1) { if (m > 12) { y += 1; m = 1; } balance = Math.max(0, balance + Number(r.monthlyLimitCents) - (spentByMonth.get(`${y}-${String(m).padStart(2, '0')}`) || 0)); }
+    return { ...r, monthlyLimit: r.monthlyLimitCents / 100, carryover: balance / 100 };
+  });
+  return json({ people: people.results, categories: categoriesWithCarryover, incomes: incomes.results.map((r: any) => ({ ...r, amount: r.amountCents / 100 })), expenses: expenses.results.map((r: any) => ({ ...r, amount: r.amountCents / 100 })) });
 }
 export async function POST(request: Request) {
   if (!(await authorized(request))) return json({ error: 'Incorrect household PIN' }, 401);

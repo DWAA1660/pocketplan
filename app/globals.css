@@ -70,6 +70,7 @@ svg { width:18px; height:18px; }
 .envelope-top span { color:var(--muted); font-size:11px; }
 .envelope-top b { font-size:11px; color:var(--green); }
 .envelope-top b.over { color:var(--danger); }
+.envelope-rollover { display:block; margin:7px 0 0 25px; color:var(--gold); font-size:11px; }
 .progress-track { height:7px; margin-top:9px; background:#ece9df; border-radius:999px; overflow:hidden; }
 .progress-track span { display:block; height:100%; border-radius:inherit; transition:width .25s ease; }
 .activity-list { display:grid; }
