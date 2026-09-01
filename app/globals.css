@@ -50,6 +50,7 @@ svg { width:18px; height:18px; }
 .status-chip { padding:7px 11px; border-radius:999px; font-size:11px; font-weight:800; }
 .status-chip.good { color:#26614e; background:#dcebe4; }
 .status-chip.bad { color:#9a4437; background:#f6ddd8; }
+.status-chip.locked { color:#725d27; background:#f5ebce; }
 .summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
 .summary-card { background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:20px; box-shadow:0 10px 28px #4a594f0a; }
 .summary-icon { width:34px; height:34px; border-radius:10px; display:grid; place-items:center; color:var(--green); background:#dcebe4; margin-bottom:17px; }
@@ -93,6 +94,7 @@ svg { width:18px; height:18px; }
 .icon-button { width:32px; height:32px; display:grid; place-items:center; border:0; border-radius:9px; background:#f0ede4; color:var(--muted); }
 .icon-button svg { width:15px; height:15px; }
 .icon-button.danger { color:var(--danger); background:#faeae6; }
+.icon-button:disabled, .secondary-button:disabled { opacity:.5; cursor:not-allowed; }
 .stack-form { display:grid; gap:14px; margin-top:22px; }
 .stack-form label { display:grid; gap:7px; color:#40544d; font-size:12px; font-weight:750; }
 .stack-form input, .stack-form select { width:100%; min-height:43px; padding:0 12px; border:1px solid #dcd7ca; border-radius:10px; outline:none; background:white; color:var(--ink); }
