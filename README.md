@@ -29,6 +29,10 @@ Build with `npm run build`. The app runs as a Cloudflare-compatible Worker via `
 
 Set `PUBLIC_SITE_URL` to the deployed HTTPS origin so social previews use the correct absolute URL.
 
+### Lunes Host
+
+Use the Node.js 24 image and set the startup command to `node bootstrap.cjs`. On every restart, the bootstrap fast-forwards from the public GitHub repository, builds the current source, applies pending local D1 migrations, and starts the Worker on the server allocation port.
+
 ## Privacy
 
 The household PIN is stored as a SHA-256 hash. The PIN itself is kept only in the browser session and sent over HTTPS with API requests. Use a strong PIN and deploy behind HTTPS.
