@@ -1,0 +1,3 @@
+import { env } from 'cloudflare:workers';
+async function hash(value: string) { const bytes = new TextEncoder().encode(value); return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))).map(b => b.toString(16).padStart(2, '0')).join(''); }
+export async function POST(request: Request) { const { pin } = await request.json() as { pin?: string }; const row = await env.DB.prepare('SELECT pin_hash AS pinHash FROM settings WHERE id = 1').first<{ pinHash: string }>(); if (!row || row.pinHash !== await hash(String(pin || ''))) return Response.json({ error: 'That PIN doesn’t match' }, { status: 401 }); return Response.json({ ok: true }); }
