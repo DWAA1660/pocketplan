@@ -2,7 +2,7 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "pocketplan",
   "main": "dist/server/index.js",
-  "compatibility_date": "2026-08-15",
+  "compatibility_date": "2026-05-15",
   "compatibility_flags": ["nodejs_compat"],
   "assets": { "directory": "dist/client" },
   "d1_databases": [
