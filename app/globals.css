@@ -72,9 +72,13 @@ svg { width:18px; height:18px; }
 .envelope-top b { font-size:11px; color:var(--green); }
 .envelope-top b.over { color:var(--danger); }
 .envelope-rollover { display:block; margin:7px 0 0 25px; color:var(--gold); font-size:11px; }
+.envelope-rollover.over { color:var(--danger); }
+.transfer-button { margin-bottom:18px; min-height:44px; }
+.transfer-note { display:block; color:var(--muted); font-weight:400; margin-top:5px; }
 .progress-track { height:7px; margin-top:9px; background:#ece9df; border-radius:999px; overflow:hidden; }
 .progress-track span { display:block; height:100%; border-radius:inherit; transition:width .25s ease; }
 .activity-list { display:grid; }
+.transfer-activity { grid-template-columns:auto minmax(0,1fr) auto auto; }
 .activity { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:11px; align-items:center; padding:13px 0; border-bottom:1px solid #eeeadf; }
 .activity:last-child { border:0; }
 .activity-icon { width:35px; height:35px; border-radius:11px; display:grid; place-items:center; }
