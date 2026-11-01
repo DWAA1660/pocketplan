@@ -50,6 +50,10 @@ test('editing, year rollover, monthly allowances, and finalized history', async 
   assert.equal((await category('2026-02', 25)).status, 200);
   assert.equal((await get('2026-01')).categories[0].monthlyLimit, 50);
   assert.equal((await get('2026-02')).categories[0].carryover, 70);
+  assert.equal((await call('PUT', { ...edit, amount: 60, note: 'Corrected market purchase', date: '2025-12-11' })).status, 200, 'can correct an expense in a finalized month');
+  assert.equal((await get('2025-12')).expenses[0].amount, 60);
+  assert.equal((await get('2025-12')).expenses[0].note, 'Corrected market purchase');
+  assert.equal((await get('2026-02')).categories[0].carryover, 90, 'corrections update subsequent rollovers');
   assert.equal((await call('PUT', { ...edit, date: '2026-02-10' })).status, 409, 'cannot move a locked transaction out');
   assert.equal((await call('DELETE', null, `?kind=expense&id=${id}&month=2026-02`)).status, 409, 'query month cannot bypass lock');
   assert.equal((await category('2025-12', 5)).status, 409);
