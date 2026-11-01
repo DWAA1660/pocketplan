@@ -110,7 +110,11 @@ export async function PUT(request: Request) {
     if (!entry) return json({ error: 'Transaction not found' }, 404);
     const date = clean(body.date, 10);
     if (!validDate(date) || !validAmount(body.amount)) return json({ error: 'Enter a valid date and an amount greater than zero' }, 400);
-    if (await monthIsFinalized(entry.date.slice(0, 7)) || await monthIsFinalized(date.slice(0, 7))) return json({ error: 'This month is finalized and locked' }, 409);
+    if (body.kind === 'expense') {
+      if (date.slice(0, 7) !== entry.date.slice(0, 7)) {
+        if (await monthIsFinalized(entry.date.slice(0, 7)) || await monthIsFinalized(date.slice(0, 7))) return json({ error: 'Finalized expenses cannot be moved to a different month' }, 409);
+      }
+    } else if (await monthIsFinalized(entry.date.slice(0, 7)) || await monthIsFinalized(date.slice(0, 7))) return json({ error: 'This month is finalized and locked' }, 409);
     if (!await env.DB.prepare('SELECT id FROM people WHERE id = ?').bind(clean(body.personId)).first()) return json({ error: 'Choose a household member' }, 400);
     if (body.kind === 'expense') {
       if (!await env.DB.prepare('SELECT id FROM categories WHERE id = ?').bind(clean(body.categoryId)).first()) return json({ error: 'Choose an envelope' }, 400);
